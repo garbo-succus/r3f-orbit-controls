@@ -1,9 +1,7 @@
-// @ts-nocheck
 import flyd from 'flyd';
 import flydfilter from 'flyd/module/filter';
 import { assoc, dissoc, compose, values, filter, sortBy, take, map } from 'ramda';
 import flydDomEvents from 'flyd-dom-events';
-import { subtract, divide } from 'mathjs';
 const eventTypes = [
     'wheel',
     'pointerover',
@@ -14,6 +12,10 @@ const eventTypes = [
     'pointercancel',
     'pointerout'
 ];
+// Subtract a list of 2D vectors
+const subtract = (...args) => args.reduce(([a1, a2], [b1, b2]) => [a1 - b1, a2 - b2]);
+// Divide a list of 2D vectors
+const divide = ([a, b], d) => [a / d, b / d];
 // Convert 'buttons' int to an array of booleans
 // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
 const bitmaskToArray = (int) => [
@@ -23,6 +25,7 @@ const bitmaskToArray = (int) => [
     !!(int & 8),
     !!(int & 16)
 ];
+// Add gesture information to an event
 const updateGesture = ({ gesture: lastGesture = {}, event: lastEvent }, e) => {
     const { touches: lastTouches, center: lastCenter } = lastGesture;
     const { pointers, event } = e;
@@ -83,6 +86,7 @@ const updatePointers = ({ pointers: lastPointers }, e) => {
         : assoc(pointerId, event, lastPointers);
     return { ...e, pointers };
 };
-const gesturestream = (target, options) => compose(flydfilter(e => e.event), // flyd.scan emits empty value on init
-flyd.scan(updateGesture, {}), flyd.scan(updatePointers, {}), flyd.map(event => ({ event })), flydDomEvents)(eventTypes, target, options);
+// Returns a flyd stream of gesture events from a DOM object
+const gesturestream = (target, options) => compose(flydfilter((e) => e.event), // flyd.scan emits empty value on init
+flyd.scan(updateGesture, {}), flyd.scan(updatePointers, {}), flyd.map((event) => ({ event })), flydDomEvents)(eventTypes, target, options);
 export default gesturestream;

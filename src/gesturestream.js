@@ -1,4 +1,3 @@
-// @ts-nocheck
 import flyd from 'flyd'
 import flydfilter from 'flyd/module/filter'
 import {
@@ -12,7 +11,6 @@ import {
   map
 } from 'ramda'
 import flydDomEvents from 'flyd-dom-events'
-import { subtract, divide } from 'mathjs'
 
 const eventTypes = [
   'wheel',
@@ -25,9 +23,16 @@ const eventTypes = [
   'pointerout'
 ]
 
+// Subtract a list of 2D vectors
+const subtract = (...args) =>
+  args.reduce(([a1, a2], [b1, b2]) => [a1 - b1, a2 - b2])
+
+// Divide a list of 2D vectors
+const divide = ([a, b], d) => [a / d, b / d]
+
 // Convert 'buttons' int to an array of booleans
 // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
-const bitmaskToArray = (int: any) => [
+const bitmaskToArray = (int) => [
   !!(int & 1),
   !!(int & 2),
   !!(int & 4),
@@ -35,24 +40,22 @@ const bitmaskToArray = (int: any) => [
   !!(int & 16)
 ]
 
-const updateGesture = (
-  { gesture: lastGesture = {}, event: lastEvent },
-  e: any
-) => {
+// Add gesture information to an event
+const updateGesture = ({ gesture: lastGesture = {}, event: lastEvent }, e) => {
   const { touches: lastTouches, center: lastCenter } = lastGesture
   const { pointers, event } = e
   if (!event) return {} // flyd.scan emits empty value on init
 
   const touchList = compose(
-    map(({ clientX, clientY }: any) => [clientX, clientY]),
+    map(({ clientX, clientY }) => [clientX, clientY]),
     take(2), // Ignore 3+ finger gestures
-    sortBy((event: any) => event.pointerId),
-    filter((event: any) => event.pointerType === 'touch'),
+    sortBy((event) => event.pointerId),
+    filter((event) => event.pointerType === 'touch'),
     values
   )(pointers)
   const touches = touchList.length
 
-  const getDeltaCenter = (center: any) =>
+  const getDeltaCenter = (center) =>
     lastCenter &&
     // Don't calculate delta if we've gone from multitouch to singletouch
     touches === lastTouches &&
@@ -71,12 +74,12 @@ const updateGesture = (
         targetSize,
         touches,
         center,
-        buttons: bitmaskToArray((touchList[0] as any).buttons),
+        buttons: bitmaskToArray(touchList[0].buttons),
         deltaXY: getDeltaCenter(center),
         angle,
-        deltaAngle: ((lastGesture as any).angle || angle) - angle,
+        deltaAngle: (lastGesture.angle || angle) - angle,
         distance,
-        deltaDistance: ((lastGesture as any).distance || distance) - distance
+        deltaDistance: (lastGesture.distance || distance) - distance
       }
     } else {
       const center = [event.clientX, event.clientY]
@@ -100,7 +103,7 @@ const updateGesture = (
 }
 
 // Update the 'pointers' prop with currently active pointers
-const updatePointers = ({ pointers: lastPointers }, e: any) => {
+const updatePointers = ({ pointers: lastPointers }, e) => {
   const { event } = e
   const { pointerId, type } = event
   const pointers =
@@ -110,12 +113,13 @@ const updatePointers = ({ pointers: lastPointers }, e: any) => {
   return { ...e, pointers }
 }
 
-const gesturestream = (target: any, options?: any) =>
+// Returns a flyd stream of gesture events from a DOM object
+const gesturestream = (target, options) =>
   compose(
-    flydfilter(e => (e as any).event), // flyd.scan emits empty value on init
+    flydfilter((e) => e.event), // flyd.scan emits empty value on init
     flyd.scan(updateGesture, {}),
     flyd.scan(updatePointers, {}),
-    flyd.map(event => ({ event })),
+    flyd.map((event) => ({ event })),
     flydDomEvents
   )(eventTypes, target, options)
 

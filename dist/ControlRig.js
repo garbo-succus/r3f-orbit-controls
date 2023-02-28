@@ -4,7 +4,7 @@ import gesturestream from './gesturestream';
 import flydDomEvents from 'flyd-dom-events';
 // Handle interaction events on a DOM object
 const ControlRig = memo(({ onGesture, domTarget }) => {
-    const target = useThree(useCallback(s => domTarget || s.gl.domElement, [domTarget]));
+    const target = useThree(useCallback((s) => domTarget || s.gl.domElement, [domTarget]));
     // PreventDefault on certain events
     useEffect(() => {
         if (!target)

@@ -11,7 +11,10 @@ interface ControlRigProps {
 // Handle interaction events on a DOM object
 const ControlRig = memo(({ onGesture, domTarget }: ControlRigProps) => {
   const target = useThree(
-    useCallback(s => domTarget || s.gl.domElement, [domTarget])
+    useCallback(
+      (s: { gl: { domElement: any } }) => domTarget || s.gl.domElement,
+      [domTarget]
+    )
   )
 
   // PreventDefault on certain events

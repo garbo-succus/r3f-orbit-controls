@@ -1,4 +1,3 @@
-import useCamera from './useCamera';
+import * as handlers from './handlers';
 import ControlRig from './ControlRig';
-import OrbitCamera from './OrbitCamera';
-export { useCamera, ControlRig, OrbitCamera };
+export { handlers, ControlRig };

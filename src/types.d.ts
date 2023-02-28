@@ -8,7 +8,7 @@ interface GesturestreamEventGesture {
   center: Vec2
   buttons: boolean[]
   deltaXY: Vec2
-  targetSize: Vec2
+  targetSize?: Vec2
   angle?: number
   distance?: number
   deltaAngle?: number

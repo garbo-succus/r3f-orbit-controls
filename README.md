@@ -1,5 +1,7 @@
 # r3f-orbit-controls
 
+# This is a pre-alpha preview and not ready for production use
+
 This library replaces three.js's OrbitControls with a React + Zustand component. 
 
 A demo is available [here]()
